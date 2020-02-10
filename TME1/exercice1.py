@@ -9,6 +9,7 @@ from collections import Counter
 import porter
 import numpy as np
 from ast import literal_eval
+import json
 
 stopwords = set(['the','a','an','on','behind','under','there','in','on'])
 # EXERCICE 1
@@ -17,7 +18,7 @@ def preprocessing_text(s):
     tab = [a for a in tab if a not in stopwords]
     for i in range(len(tab)):
             tab[i] = porter.stem(tab[i])
-    res = collections.Counter(tab)
+    res = Counter(tab)
     return dict(res)
 
 
@@ -82,13 +83,17 @@ def buildDocCollectionSimple(filename):
 
 def buildDocumentCollectionRegex(filename):
     corpus = open(filename).read().split(".I")
-    print(corpus[1])
     collection = {}
-    print(re.search(r"[0-9]",corpus[1]).group(0))
-    print(corpus[1])
-    print("aaaaaaaa")
-    print(re.search(r"\.T[\s\S]*\.B",corpus[1]).group(0))
-    return -1
+    del corpus[0]
+    for doc in corpus:
+        ident = re.search(r"[0-9]",doc).group(0)
+        text = re.search(r"\.T([\s\S]*?)\.[ITBAKWX]",doc).group(1)
+        print(text)
+        collection[str(ident)] = text
+    print(collection)
+    file = open("camshort-dict.txt","w")
+    file.write(json.dumps(collection)) 
+    return 0
     
     
 print(buildDocumentCollectionRegex("cacmShort-good.txt"))
