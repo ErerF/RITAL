@@ -1,6 +1,6 @@
 .I 1
 .T
-Preliminary Report-International Algebraic Language
+Preliminary Report-International Algebraic Language Language
 jgkfldjgfkld
 .B
 CACM December, 1958
@@ -143,7 +143,7 @@ CA581002 JB March 22, 1978  8:36 PM
 
 .I 9
 .T
-Proposal for an UNCOL
+Proposal for an UNCOL Proposal Proposal
 .B
 CACM October, 1958
 .A
@@ -157,7 +157,7 @@ CA581001 JB March 22, 1978  8:37 PM
 
 .I 10
 .T
-Glossary of Computer Engineering and Programming Terminology
+Glossary of Computer Engineering and Programming Terminology Computer
 .B
 CACM September, 1958
 .N
