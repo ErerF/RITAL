@@ -13,6 +13,7 @@ import json
 from TextRep import *
 import porter
 import re
+import copy
 
 class Document():
     
@@ -89,25 +90,34 @@ class IndexerSimple():
                     self.indexInverse[word] = dict()
                     self.indexInverse[word][str(key)] = normalizedDoc[word]
             
-            
-        
-        
-        
-       
         
     def getTfsForDoc(self,ident):
         return self.index[str(ident)]
+    
     def getTfIDFsForDoc(self,ident):
-        return
+        N = len(self.index)
+        doc = copy.deepcopy(self.index[str(ident)])
+        for k,v in self.index[str(ident)].items():
+            doc[k] = self.index[str(ident)][k] * np.log((1+N) /(1+ len(self.indexInverse[k])))
+        return doc
+            
     
     def TfsForStem(self,stem):
-        return
+        return self.indexInverse[stem]
+    
     def getTfIDFsForStem(self,stem):
-        return
-    def getStrDoc(ident):
-        return
+        N = len(self.index)
+        stem_tfidf = copy.deepcopy(self.indexInverse[stem])
+        for k,v in self.indexInverse[stem].items():
+            stem_tfidf[k] = self.index[str(k)][stem] * np.log((1+N)/(1 + len(self.indexInverse[stem])))
+        return stem_tfidf
+    
+    def getStrDoc(self,parser,ident):
+        return parser.collection[str(ident)].T
+        
     
 ind = IndexerSimple()
 ind.indexation(p.collection)
 
-print(ind.getTfsForDoc(2))
+print(ind.getTfIDFsForDoc(2))
+print(ind.getStrDoc(p,2))
