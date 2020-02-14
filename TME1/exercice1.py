@@ -97,4 +97,28 @@ def buildDocumentCollectionRegex(filename):
     
     
 print(buildDocumentCollectionRegex("cacmShort-good.txt"))
-                 
+       
+requete = "home sales top"
+
+def modeleBooleeen(requete,filenameIndex):
+    index = literal_eval(open(filenameIndex).read())
+    print(index)
+    print(type(index))
+    
+modeleBooleen("corpusindex.txt")
+query = ""          
+# Prend la requete sous forme de vecteur et realise un vecteur pour chaque document 
+# à partir de l'index Inverse
+def modeleVectoriel(requete,filenameIndex):
+    termsRequete = requete.split(" ")
+    index = literal_eval(open(filenameIndex).read())
+    scores = {}
+    print(index)
+    print(type(index))
+    
+    for termRequete, (term, docs) in zip(requete,index.items()):
+        print(termRequete)
+  
+      
+  
+modeleVectoriel("corpusindexinverse.txt")
