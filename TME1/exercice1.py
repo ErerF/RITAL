@@ -12,7 +12,7 @@ from ast import literal_eval
 import json
 
 stopwords = set(['the','a','an','on','behind','under','there','in','on'])
-# EXERCICE 1
+# EXERCICE 1 TME 1
 def preprocessing_text(s):
     tab = s.lower().split(" ")
     tab = [a for a in tab if a not in stopwords]
@@ -61,6 +61,95 @@ print("tfidf")
 print(tf_idf(4))
 
 
+
+
+# EXERCICE 1 TME 2
+"""
+Q1.1 : Pour le modèle booleen on peut utiliser l'index pour verifier 
+si les termes de la requete sont dans le document ou non
+
+Pour le modele vectoriel, on peut utiliser l'index inversé pour avoir le dico
+et l'index normal pour avoir les documents
+"""
+
+
+print(buildDocumentCollectionRegex("cacmShort-good.txt"))
+       
+requete = "home sales top"
+#Fonction qui va vérifier que sur la requete donnnée qui ne correspond qu'à faire des "ET" logiques
+def modeleBooleen(requete,filenameIndex):
+    requete = preprocessing_text(requete)
+    index = literal_eval(open(filenameIndex).read())
+    scores = {}
+    for docNum, doc in index.items():
+        for t in requete:
+            if t not in list(doc.keys()):
+                scores[str(docNum)] = 0
+        if str(docNum) not in scores.keys():
+            scores[str(docNum)] = 1
+    print(index)
+    return scores
+    
+print(modeleBooleen(requete,"corpusindex.txt"))
+  
+
+    
+# Prend la requete sous forme de vecteur et realise un vecteur pour chaque document 
+# à partir de l'index Inverse
+def modeleVectoriel(requete,filenameIndex,filenameIndexRev):
+    requete = preprocessing_text(requete)
+    indexRev = literal_eval(open(filenameIndexRev).read())
+    index = literal_eval(open(filenameIndex).read())
+    dico = list(indexRev.keys())
+    scores = {}
+    requeteVecteur = []
+    
+    #Vecteur de la requete
+    for t in dico:
+        if t in requete:
+            requeteVecteur.append( requete[t])
+        else:
+            requeteVecteur.append(0)
+    print(requeteVecteur)
+        
+     #Score de chaque document   
+    for docNum, doc in index.items():
+        docVecteur = []
+        for t in dico:
+            if t in doc.keys():
+                docVecteur.append(doc[t])
+            else:
+                docVecteur.append(0)        
+        scores[str(docNum)] = np.dot(requeteVecteur,docVecteur) 
+    return scores
+      
+  
+print(modeleVectoriel(requete,"corpusindex.txt","corpusindexinverse.txt"))
+
+
+# PAs compris le produit cartésien alors que dans le cours on parle de produit scalaire ou cosinus
+
+
+#EXERCICE 1 TME 3
+"""   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # EXERCICE 2
 print("EXO 2 ")
 def buildDocCollectionSimple(filename):
@@ -96,29 +185,4 @@ def buildDocumentCollectionRegex(filename):
     return 0
     
     
-print(buildDocumentCollectionRegex("cacmShort-good.txt"))
-       
-requete = "home sales top"
-
-def modeleBooleeen(requete,filenameIndex):
-    index = literal_eval(open(filenameIndex).read())
-    print(index)
-    print(type(index))
-    
-modeleBooleen("corpusindex.txt")
-query = ""          
-# Prend la requete sous forme de vecteur et realise un vecteur pour chaque document 
-# à partir de l'index Inverse
-def modeleVectoriel(requete,filenameIndex):
-    termsRequete = requete.split(" ")
-    index = literal_eval(open(filenameIndex).read())
-    scores = {}
-    print(index)
-    print(type(index))
-    
-    for termRequete, (term, docs) in zip(requete,index.items()):
-        print(termRequete)
-  
-      
-  
-modeleVectoriel("corpusindexinverse.txt")
+"""

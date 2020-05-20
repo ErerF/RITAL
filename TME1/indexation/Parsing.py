@@ -402,6 +402,7 @@ class Vectoriel(IRModel):
     def setNorms(self):
         '''
         Calcule la norme de chaque representation de document
+        Fait une fois lors de la creation de l'instance de Vectoriel
         '''
         for k,v in self.docWeights.items():
             self.norms[str(k)] = np.linalg.norm(np.array(v))
