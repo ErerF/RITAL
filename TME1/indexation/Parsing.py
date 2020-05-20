@@ -464,7 +464,7 @@ class ModeleLangue(IRModel):
         for docNum,docRep in self.docWeights.items():
                  proba = 1
                  for t in queryStems:
-                     # pt = tf(t) / sum sur tous les t tf(t)
+                     # pt = tf(t) / sum sur tous les t de tf(t)
                      # modele de langue du document
                      weightsStemDeDoc = self.weighter.getWeightsForDoc(docNum)
                      probaT_ThetaD = weightsStemDeDoc[t]/ sum(list(weightsStemDeDoc.values()))
