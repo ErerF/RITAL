@@ -1,7 +1,6 @@
 .I 1
 .T
 Preliminary Report-International Algebraic Language Language
-jgkfldjgfkld
 .B
 CACM December, 1958
 .A

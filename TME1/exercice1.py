@@ -64,6 +64,7 @@ print(tf_idf(4))
 
 
 # EXERCICE 1 TME 2
+print("TME2")
 """
 Q1.1 : Pour le modèle booleen on peut utiliser l'index pour verifier 
 si les termes de la requete sont dans le document ou non
@@ -73,7 +74,7 @@ et l'index normal pour avoir les documents
 """
 
 
-print(buildDocumentCollectionRegex("cacmShort-good.txt"))
+
        
 requete = "home sales top"
 #Fonction qui va vérifier que sur la requete donnnée qui ne correspond qu'à faire des "ET" logiques
@@ -87,7 +88,7 @@ def modeleBooleen(requete,filenameIndex):
                 scores[str(docNum)] = 0
         if str(docNum) not in scores.keys():
             scores[str(docNum)] = 1
-    print(index)
+    scores = sorted(scores.items(),key=lambda item: item[1], reverse= True)
     return scores
     
 print(modeleBooleen(requete,"corpusindex.txt"))
@@ -110,7 +111,6 @@ def modeleVectoriel(requete,filenameIndex,filenameIndexRev):
             requeteVecteur.append( requete[t])
         else:
             requeteVecteur.append(0)
-    print(requeteVecteur)
         
      #Score de chaque document   
     for docNum, doc in index.items():
@@ -121,6 +121,7 @@ def modeleVectoriel(requete,filenameIndex,filenameIndexRev):
             else:
                 docVecteur.append(0)        
         scores[str(docNum)] = np.dot(requeteVecteur,docVecteur) 
+    scores = sorted(scores.items(),key=lambda item: item[1], reverse= True)
     return scores
       
   
@@ -131,22 +132,98 @@ print(modeleVectoriel(requete,"corpusindex.txt","corpusindexinverse.txt"))
 
 
 #EXERCICE 1 TME 3
+
+#1.1
+
+print("TME3")
+
+requete1 = "top sales"
+pertinent1 = [0,1]
+requete2 = "sales increase july"
+pertinent2 = [2,3]
+requete3 = "new home"
+pertinent3 = []
+
+
+print(modeleBooleen(requete1,"corpusindex.txt"))
+print(modeleBooleen(requete2,"corpusindex.txt"))
+print(modeleBooleen(requete3,"corpusindex.txt"))
+print()
+print(modeleVectoriel(requete1,"corpusindex.txt","corpusindexinverse.txt"))
+print(modeleVectoriel(requete2,"corpusindex.txt","corpusindexinverse.txt"))
+print(modeleVectoriel(requete3,"corpusindex.txt","corpusindexinverse.txt"))
+
+#Nous avons considéré que si le score était de 0 alors le doc n'était pas pertinent pour le score
+def pa2(res,pertinent):
+    res = dict(res[0:2])
+    tp = 0
+    fp = 0
+    for doc,r in res.items():
+        if r > 0 and doc in pertinent:
+            tp += 1
+        if r > 0 and doc not in pertinent:
+            fp += 1
+    if tp + fp ==0:
+        return 0
+    return tp/(tp + fp)
+
+    
+def ra2(res,pertinent):
+    res = dict(res[0:2])
+    tp = 0
+    fn = 0
+    for doc,r in res.items():
+        if r > 0 and doc in pertinent:
+            tp += 1
+        
+    for d in pertinent:
+        if d not in res.keys() or res[str(d)] == 0:
+            fn += 1
+    if tp + fn == 0:
+        return 0
+    return tp/(tp + fn)
+    
+#Pas d'indication donc on a considéré la f1 mesure
+def fa2(res,pertinent):
+    P = pa2(res,pertinent)
+    R = ra2(res,pertinent)
+    if (P+R) == 0:
+        return 0
+    return 2*(P*R)/(P+R)
+
+listPrecision = []
+listPrecision.append(pa2(modeleBooleen(requete1,"corpusindex.txt"),pertinent1))
+listPrecision.append(pa2(modeleBooleen(requete2,"corpusindex.txt"),pertinent2))
+listPrecision.append(pa2(modeleBooleen(requete3,"corpusindex.txt"),pertinent3))
+print(listPrecision)
+print(np.mean(np.array(listPrecision)))
+
+
+listRappel = []
+listRappel.append(ra2(modeleBooleen(requete1,"corpusindex.txt"),pertinent1))
+listRappel.append(ra2(modeleBooleen(requete2,"corpusindex.txt"),pertinent2))
+listRappel.append(ra2(modeleBooleen(requete3,"corpusindex.txt"),pertinent3))
+print(listRappel)
+print(np.mean(np.array(listRappel)))
+
+listF = []
+listF.append(fa2(modeleBooleen(requete1,"corpusindex.txt"),pertinent1))
+listF.append(fa2(modeleBooleen(requete2,"corpusindex.txt"),pertinent2))
+listF.append(fa2(modeleBooleen(requete3,"corpusindex.txt"),pertinent3))
+print(listF)
+print(np.mean(np.array(listF)))
+
+# Problème au niveau des fonctions de scores qui sont mauvaises ou mauvaise interprétation 
+# de la question ?
+#1.2
+
+
+
+
 """   
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(buildDocumentCollectionRegex("cacmShort-good.txt"))
 
 
 
