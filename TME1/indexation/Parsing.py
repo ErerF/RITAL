@@ -145,10 +145,13 @@ class Weighter1(Weighter):
     
     def getWeightsForDoc(self,idDoc):
         dico = self.index.indexInverse.keys()
-        weights = copy.deepcopy(self.index.getTfsForDoc(idDoc))
+        weights = {}
+        copyWeights = copy.deepcopy(self.index.getTfsForDoc(idDoc))
         for t in dico:
-            if t not in weights.keys():
+            if t not in copyWeights.keys():
                 weights[t] = 0
+            else:
+                weights[t] = copyWeights[t]
         return weights
         
     def getWeightsForStem(self,stem):
@@ -181,10 +184,13 @@ class Weighter2(Weighter):
     
     def getWeightsForDoc(self,idDoc):
         dico = self.index.indexInverse.keys()
-        weights = copy.deepcopy(self.index.getTfsForDoc(idDoc))
+        weights = {}
+        copyWeights = copy.deepcopy(self.index.getTfsForDoc(idDoc))
         for t in dico:
-            if t not in weights.keys():
+            if t not in copyWeights.keys():
                 weights[t] = 0
+            else:
+                weights[t] = copyWeights[t]
         return weights
         
         
@@ -217,10 +223,13 @@ class Weighter3(Weighter):
     
     def getWeightsForDoc(self,idDoc):
         dico = self.index.indexInverse.keys()
-        weights = copy.deepcopy(self.index.getTfsForDoc(idDoc))
+        weights = {}
+        copyWeights = copy.deepcopy(self.index.getTfsForDoc(idDoc))
         for t in dico:
-            if t not in weights.keys():
+            if t not in copyWeights.keys():
                 weights[t] = 0
+            else:
+                weights[t] = copyWeights[t]
         return weights
         
     def getWeightsForStem(self,stem):
@@ -323,7 +332,7 @@ class Weighter5(Weighter):
             else:
                 weights[d] = 0
         return weights
-    
+    0
     def getWeightsForQuery(self,query):
         N = len(self.index.index)
         stemmer = PorterStemmer()
@@ -349,30 +358,192 @@ class IRModel():
     
     def __init__(self,index):
         self.index = index
+        self.scores = {}
+        self.couples = []
+        
+        self.docWeights = {} # couple document/representation du doc
+        self.setDocWeights() 
+        print(self.docWeights)
+        
+    def setDocWeights(self):
+        '''
+        Transforme les documents en leurs représentations selon le weighter choisi
+        '''
+        for k,v in self.index.index.items():
+            self.docWeights[str(k)] = list(self.weighter.getWeightsForDoc(k).values())
+        
     #renvoie un dico (doc : score)
-    def getScores(query):
+    def getScores(self,query):
         raise NotImplementedError()
         
-    def getRanking(query):
-        couples = dict.items().sort(key=itemgetter(1), reverse= True)
+    def getRanking(self):
+        couples = sorted(self.scores.items(),key=lambda item: item[1], reverse= True)
         return couples
     
 class Vectoriel(IRModel):
     
-    def __init__(self,weighter,index):
+    def __init__(self,weighter,index,normalized):
+        print(index)
         self.weighter = weighter
-        self.normalized = False
-        self.__init__(index)
+        self.normalized = normalized
+        IRModel.__init__(self,index)
         
-    def getScores(query):
-        return
+
+        print()
+        print()
+        print()
+        self.norms = {} # couples  doc/norme euclidienne
+        self.setNorms()
+        print(self.norms)
+    
+
+        
+        
+    def setNorms(self):
+        '''
+        Calcule la norme de chaque representation de document
+        '''
+        for k,v in self.docWeights.items():
+            self.norms[str(k)] = np.linalg.norm(np.array(v))
+
+        
+    def getScores(self,query):
+        queryWeights = list(self.weighter.getWeightsForQuery(query).values())
+        print("queryWeights")
+        print(queryWeights)
+        dico = self.index.indexInverse.keys()
+        if self.normalized:
+            print("Cosinus")
+            queryNorm = np.linalg.norm(np.array(queryWeights))
+            for docNum,docRep in self.docWeights.items():
+                self.scores[str(docNum)] = np.dot(docRep,queryWeights)/(queryNorm*self.norms[str(docNum)])
+        else:
+            print("Scalaire")
+            for docNum,docRep in self.docWeights.items():
+                self.scores[str(docNum)] = np.dot(docRep,queryWeights)
+        return self.scores
+    
+
+w = Weighter1(ind)
+print(1)
+print("representation du document")
+print(w.getWeightsForDoc(9))
+print("poids du stem")
+print(w.getWeightsForStem('extract'))
+print("representation de la query")
+print(w.getWeightsForQuery("home glossary use proposal report report "))
+
+vectoriel = Vectoriel(w,ind,True)
+print(vectoriel.getScores("home glossary use proposal report report "))
+print(vectoriel.getRanking())
+
     
 class ModeleLangue(IRModel):
         
-    def getScores(query):
-        return
+    def __init__(self,weighter,index):
+        self.weighter = weighter
+        IRModel.__init__(self,index)
+        
+    def getScores(self,query):
+        #entre 0.2 et 0.8
+        lamb = 0.8
+        print(query)
+        queryWeights = self.weighter.getWeightsForQuery(query)
+        print(queryWeights)
+        queryStems = []
+        for k,v in queryWeights.items():
+            for i in range(v):
+                queryStems.append(k)
+        print(queryStems)
+        
+        tfTotalSurCol = 0
+        for doc, v in self.index.index.items():
+            tfTotalSurCol = tfTotalSurCol + sum(list(v.values()))
+        
+        for docNum,docRep in self.docWeights.items():
+                 proba = 1
+                 for t in queryStems:
+                     # pt = tf(t) / sum sur tous les t tf(t)
+                     # modele de langue du document
+                     weightsStemDeDoc = self.weighter.getWeightsForDoc(docNum)
+                     probaT_ThetaD = weightsStemDeDoc[t]/ sum(list(weightsStemDeDoc.values()))
+                     #modele de langue de la collection
+                     tfDeTSurCol = sum(list(self.weighter.getWeightsForStem(t).values()))
+
+                     probaT_ThetaC = tfDeTSurCol / tfTotalSurCol
+                     
+                     proba = proba * (1-lamb)*probaT_ThetaD+ lamb*probaT_ThetaC
+                     
+                 self.scores[str(docNum)] = proba
+            
+        return self.scores
     
+
+# Utilisation du TF pour calculer les Pt sur la query avec le weighter 2
+w = Weighter2(ind)
+print(1)
+
+langue = ModeleLangue(w,ind)
+print("ModeleLangue")
+print(langue.getScores("home glossary use proposal report report "))
+print(langue.getRanking())
+
+
 class Okapi(IRModel):
         
-    def getScores(query):
-        return
+    def __init__(self,weighter,index):
+        self.weighter = weighter
+        IRModel.__init__(self,index)
+        
+    def getScores(self,query):
+        k1 = 1.2
+        b = 0.75
+        
+        # taille moyenne d un texte après avoir stem
+        avgdl = 0
+        for doc, v in self.index.index.items():
+            avgdl = avgdl + sum(list(v.values()))
+        avgdl = avgdl / len(self.index.index.items())
+        
+        #Stemmatisation de la query
+        stemmer = PorterStemmer()
+        queryWeights = stemmer.getTextRepresentation(query)
+        queryStems = []
+        
+        for k,v in queryWeights.items():
+            for i in range(v):
+                queryStems.append(k)
+        print(queryStems)
+        
+        #Recuperation de l'IDF des termes de la query
+        queryTermsIDF = self.weighter.getWeightsForQuery(query)
+        print(queryTermsIDF)
+        
+        # Evaluer le score Okapi BM 25 pour chaque document
+        for docNum,docRep in self.docWeights.items():
+            score = 0
+            docSize = sum(list(self.index.index[str(docNum)].values()))
+            tfDoc = self.weighter.getWeightsForDoc(docNum)
+
+
+            for t in queryStems:
+                if t in queryTermsIDF.keys() and t in tfDoc.keys():
+                    scoreTemp = queryTermsIDF[t] * ((tfDoc[t] * (k1 + 1))/(tfDoc[t] + k1 * (1 - b + b *(docSize/avgdl))))
+
+                    score = score + scoreTemp
+                     
+            self.scores[str(docNum)] = score
+            
+        return self.scores
+    
+
+# Besoin de l'idf et du tf pour faire l'okapiBM25 donc weighter3
+w = Weighter3(ind)
+
+oka = Okapi(w,ind)
+print("OkapiBM25")
+print(oka.getScores("home glossary use proposal report report "))
+print(oka.getRanking())
+
+print("fin")
+print(ind.index)
