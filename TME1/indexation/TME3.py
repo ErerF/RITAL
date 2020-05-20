@@ -7,7 +7,7 @@ Created on Wed May 20 04:15:44 2020
 
 #import cisi
 
-
+import math
 
 
 class Query():
@@ -89,5 +89,80 @@ class Rappel(EvalMesure):
         for doc in liste:
             if doc in query.listRelevantDocs:
                 rappel += 1
-        return precision/len(query.listRelevantDocs)
+        return rappel/len(query.listRelevantDocs)
         
+class Fmesure(EvalMesure):
+    
+    def __init__(self,rang):
+        self.rang = rang
+        
+    def evalQuery(liste,query):
+        if len(liste) > self.rang:
+            liste = liste[:rang-1]
+            
+        evalPrecision = Precision(self.rang)
+        P = evalPrecision.evalQuery(liste,query)
+        evalRappel = Rappel(self.rang)
+        R = evalRappel.evalQuery(liste,query)
+
+        return 2*P*R/(P+R)
+    
+class PrecisionMoyenne(EvalMesure):
+    """
+    Somme des produits Precision à rang k fois le document au rang k est pertinent ou non
+    Divisé par le nombre de docs pertinents à la query
+    """
+    def evalQuery(liste,query):
+        numberRelevantDocs = len(query.listRelevantDocs)
+        avgP = 0
+        
+        for i in range(len(liste)):
+            evalPrecision = Precision(i)
+            pak = evalPrecision(liste,query)
+            
+            if liste[i] in query.listRelevantDocs:
+                Rdkq = 1
+            else:
+                Rdkq = 0
+            
+            avgP += Rdkq * pak  
+            
+        return avgP/numberRelevantDocs
+    
+class ReciprocalRank(EvalMesure):
+    """
+    Dans le cours il n'y a que le mean reciproqual rank mais cela ne semble pas correspondre
+    à ce qui est demandé là. Je suppose qu'il faut renvoyer le rang du premier doc pertinent 
+    de la liste
+    """
+    def evalQuery(liste,query):
+        for i in range(len(liste)):
+            if liste[i] in query.listRelevantDocs:
+                return 1/(i+1)
+        return 1/len(liste)
+    
+
+class NDCG(EvalMesure):
+    """
+    Pas d'info sur quels documents sont les plus pertinents  parmis ceux jugés comme
+    pertinents je crois, donc on met à 1 le reli de la formule DCG
+    """
+    def evalQuery(liste,query):
+        IDCG = 1
+        for i in range(1,len(query.listRelevantDocs)):
+            IDCG += 1/math.log(i+1,2)
+            
+        if liste[0] in query.listRelevantDocs:
+            DCG = 1
+        else:
+            DCG = 0
+        for i in range(1,len(liste)):
+            if liste[i] in query.listRelevantDocs:
+                DCG += 1/math.log(i+1,2)
+        
+        return DCG/IDCG
+        
+        
+class EvalIRModel():
+    
+    
