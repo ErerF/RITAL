@@ -58,11 +58,11 @@ class Parser():
             return res.group(1)
         return "e"
     
-    
+""" 
 p = Parser()
 p.parsing("cisi/cisi.txt")
 print(p.collection["1"].W)
-
+"""
 
 class IndexerSimple():
     
@@ -116,10 +116,10 @@ class IndexerSimple():
     def getStrDoc(self,parser,ident):
         return parser.collection[str(ident)].T
         
-    
+"""   
 ind = IndexerSimple()
 ind.indexation(p.collection)
-
+"""
 
 
 class Weighter():
@@ -172,8 +172,8 @@ class Weighter1(Weighter):
             else:
                 weights[t] = 0
         return weights
-    
-w = Weighter1(ind)
+   
+#w = Weighter1(ind)
 
 
 class Weighter2(Weighter):
@@ -208,7 +208,7 @@ class Weighter2(Weighter):
             weights[t] = count[t]
         return weights
     
-w = Weighter2(ind)
+#w = Weighter2(ind)
 
 
 
@@ -247,7 +247,7 @@ class Weighter3(Weighter):
                 weights[t] = 0
         return weights
     
-w = Weighter3(ind)
+#w = Weighter3(ind)
 
 
 class Weighter4(Weighter):
@@ -288,7 +288,7 @@ class Weighter4(Weighter):
                 weights[t] = 0
         return weights
     
-w = Weighter4(ind)
+#w = Weighter4(ind)
 
 
 class Weighter5(Weighter):
@@ -319,7 +319,7 @@ class Weighter5(Weighter):
             else:
                 weights[d] = 0
         return weights
-    0
+    
     def getWeightsForQuery(self,query):
         N = len(self.index.index)
         stemmer = PorterStemmer()
@@ -335,7 +335,7 @@ class Weighter5(Weighter):
                 weights[t] = 0
         return weights
     
-w = Weighter5(ind)
+#w = Weighter5(ind)
     
 class IRModel():
     
@@ -360,6 +360,8 @@ class IRModel():
         
     def getRanking(self):
         couples = sorted(self.scores.items(),key=lambda item: item[1], reverse= True)
+        print("Ranking")
+        print(couples)
         return couples
     
 class Vectoriel(IRModel):
@@ -376,9 +378,6 @@ class Vectoriel(IRModel):
         self.norms = {} # couples  doc/norme euclidienne
         self.setNorms()
 
-    
-
-        
         
     def setNorms(self):
         '''
@@ -393,20 +392,23 @@ class Vectoriel(IRModel):
         queryWeights = list(self.weighter.getWeightsForQuery(query).values())
         dico = self.index.indexInverse.keys()
         if self.normalized:
-            print("Cosinus")
+            #print("Cosinus")
             queryNorm = np.linalg.norm(np.array(queryWeights))
             for docNum,docRep in self.docWeights.items():
-                self.scores[str(docNum)] = np.dot(docRep,queryWeights)/(queryNorm*self.norms[str(docNum)])
+                if (queryNorm*self.norms[str(docNum)]) == 0:
+                    self.scores[str(docNum)] = 0
+                else:
+                    self.scores[str(docNum)] = np.dot(docRep,queryWeights)/(queryNorm*self.norms[str(docNum)])
         else:
-            print("Scalaire")
+            #print("Scalaire")
             for docNum,docRep in self.docWeights.items():
                 self.scores[str(docNum)] = np.dot(docRep,queryWeights)
         return self.scores
     
 
-w = Weighter1(ind)
+#w = Weighter1(ind)
 
-vectoriel = Vectoriel(w,ind,True)
+#vectoriel = Vectoriel(w,ind,True)
 
     
 class ModeleLangue(IRModel):
@@ -448,9 +450,9 @@ class ModeleLangue(IRModel):
     
 
 # Utilisation du TF pour calculer les Pt sur la query avec le weighter 2
-w = Weighter2(ind)
+#w = Weighter2(ind)
 
-langue = ModeleLangue(w,ind)
+#langue = ModeleLangue(w,ind)
 print("ModeleLangue")
 
 class Okapi(IRModel):
@@ -502,9 +504,9 @@ class Okapi(IRModel):
     
 
 # Besoin de l'idf et du tf pour faire l'okapiBM25 donc weighter3
-w = Weighter3(ind)
+#w = Weighter3(ind)
 
-oka = Okapi(w,ind)
-print("OkapiBM25")
+#oka = Okapi(w,ind)
+#print("OkapiBM25")
 
 print("fin")

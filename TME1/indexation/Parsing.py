@@ -537,7 +537,7 @@ class Okapi(IRModel):
             
         return self.scores
     
-
+"""
 # Besoin de l'idf et du tf pour faire l'okapiBM25 donc weighter3
 w = Weighter3(ind)
 
@@ -548,3 +548,4 @@ print(oka.getRanking())
 
 print("fin")
 print(ind.index)
+"""
