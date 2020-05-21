@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 10 01:10:36 2020
 
-@author: arnau
-"""
 
 from collections import Counter
 
@@ -360,8 +356,8 @@ class IRModel():
         
     def getRanking(self):
         couples = sorted(self.scores.items(),key=lambda item: item[1], reverse= True)
-        print("Ranking")
-        print(couples)
+        #print("Ranking")
+        #print(couples)
         return couples
     
 class Vectoriel(IRModel):
@@ -395,7 +391,7 @@ class Vectoriel(IRModel):
             #print("Cosinus")
             queryNorm = np.linalg.norm(np.array(queryWeights))
             for docNum,docRep in self.docWeights.items():
-                if (queryNorm*self.norms[str(docNum)]) == 0:
+                if (queryNorm*self.norms[str(docNum)]) == 0: # pour éviter les NaN
                     self.scores[str(docNum)] = 0
                 else:
                     self.scores[str(docNum)] = np.dot(docRep,queryWeights)/(queryNorm*self.norms[str(docNum)])
@@ -426,30 +422,32 @@ class ModeleLangue(IRModel):
             for i in range(v):
                 queryStems.append(k)
         
+        #Calcul du nombre de terme dans la collection
         tfTotalSurCol = 0
         for doc, v in self.index.index.items():
             tfTotalSurCol = tfTotalSurCol + sum(list(v.values()))
         
         for docNum,docRep in self.docWeights.items():
-                 proba = 1
+                 proba = 0
+                 weightsStemDeDoc = self.weighter.getWeightsForDoc(docNum)
                  for t in queryStems:
-                     # pt = tf(t) / sum sur tous les t de tf(t)
+                     # tf de t dans le document / nb de termes du document
                      # modele de langue du document
-                     weightsStemDeDoc = self.weighter.getWeightsForDoc(docNum)
                      probaT_ThetaD = weightsStemDeDoc[t]/ sum(list(weightsStemDeDoc.values()))
                      #modele de langue de la collection
+                     # tf de t dans la collection / nb de termes dans la collection
                      tfDeTSurCol = sum(list(self.weighter.getWeightsForStem(t).values()))
 
                      probaT_ThetaC = tfDeTSurCol / tfTotalSurCol
                      
-                     proba = proba * (1-lamb)*probaT_ThetaD+ lamb*probaT_ThetaC
+                     proba = proba * ((1-lamb)*probaT_ThetaD+ lamb*probaT_ThetaC)
                      
                  self.scores[str(docNum)] = proba
             
         return self.scores
     
 
-# Utilisation du TF pour calculer les Pt sur la query avec le weighter 2
+# Utilisation du TF pour calculer les Pt sur la query donc on utilise le weighter 2
 #w = Weighter2(ind)
 
 #langue = ModeleLangue(w,ind)

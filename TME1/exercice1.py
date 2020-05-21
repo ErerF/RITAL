@@ -217,7 +217,20 @@ print(np.mean(np.array(listF)))
 # de la question ?
 #1.2
 
-
+def NDCG(self,liste,query):
+    IDCG = 1
+    for i in range(1,len(query.listRelevantDocs)):
+        IDCG += 1/math.log(i+1,2)
+        
+    if liste[0] in query.listRelevantDocs:
+        DCG = 1
+    else:
+        DCG = 0
+    for i in range(1,len(liste)):
+        if liste[i] in query.listRelevantDocs:
+            DCG += 1/math.log(i+1,2)
+    
+    return DCG/IDCG
 
 
 """   
