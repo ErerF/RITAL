@@ -1,1 +1,0 @@
-{0: {'new': 1, 'home': 1, 'ha': 1, 'been': 1, 'sale': 1, 'top': 1, 'forecast': 1}, 1: {'home': 1, 'sale': 1, 'rise': 1, 'juli': 1}, 2: {'is': 1, 'increas': 1, 'home': 1, 'sale': 1, 'juli': 1}, 3: {'juli': 1, 'encount': 1, 'new': 1, 'home': 1, 'sale': 1, 'rise': 1}}
